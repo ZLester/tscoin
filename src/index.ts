@@ -1,5 +1,5 @@
 import Blockchain from './Blockchain/';
-import Server from './Server';
+import Node from './Node';
 import conf from './conf';
 
 const zetacoin = new Blockchain(
@@ -8,6 +8,6 @@ const zetacoin = new Blockchain(
     'dixitquedeusfiatzetaetfactaestzeta',
 );
 
-const server = new Server(zetacoin);
+const node = new Node(zetacoin, conf.URL);
 
-server.listen(conf.PORT);
+node.listen(conf.PORT);

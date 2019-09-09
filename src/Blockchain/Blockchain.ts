@@ -1,10 +1,14 @@
 import Block, { BlockData } from '../Block/';
 import Transaction from '../Transaction/';
+import Reward from '../Reward/';
+
 import sha256 from 'sha256';
 
 interface BlockchainI {
     chain: Block[],
     pendingTransactions: Transaction[],
+    networkNodes: string[],
+    miningReward: Reward,
 
     createBlock: (
         nonce: number,
@@ -30,6 +34,8 @@ interface BlockchainI {
 
 class Blockchain implements BlockchainI {
     chain: Block[] = [];
+    miningReward = new Reward();
+    networkNodes: string[] = [];
     pendingTransactions: Transaction[] = [];
 
     constructor (
@@ -55,6 +61,7 @@ class Blockchain implements BlockchainI {
             hash,
             previousBlockHash,
             this.pendingTransactions,
+            0,
         );
 
         this.pendingTransactions = [];
@@ -91,6 +98,7 @@ class Blockchain implements BlockchainI {
 
         const lastBlock = this.getLastBlock();
 
+        // Index of block the transaction will be mined in
         return lastBlock.index + 1;
     }
 
@@ -102,12 +110,28 @@ class Blockchain implements BlockchainI {
         let nonce = startingNonce;
         let hash = this.hashBlock(block, previousBlockHash, nonce);
 
-        while (hash.slice(0, 4) !== '0000') {
+        while (hash.slice(0, 4) !== '0000') { // TODO
             nonce++;
             hash = this.hashBlock(block, previousBlockHash, nonce);
         }
 
         return nonce;
+    }
+
+    addNetworkNode (...urls: string[]) {
+        const networkNodesSet = new Set(this.networkNodes);
+
+        urls.forEach(url => networkNodesSet.add(url));
+
+        this.networkNodes = [...networkNodesSet];
+    }
+
+    removeNetworkNode (...urls: string[]) {
+        const networkNodesSet = new Set(this.networkNodes);
+
+        urls.forEach(url => networkNodesSet.delete(url));
+
+        this.networkNodes = [...networkNodesSet];
     }
 }
 
